@@ -1,16 +1,17 @@
-const connection = require('../database/connection');
+const db = require('../database/connection');
 
 module.exports = {
     async index(request, response) {
         try {
-            const qtdByPage = 10;
+            const qtdByPage = 30;
             const { page = 1 } = request.query;
-            const [count] = await connection('produtos').count();
-            const produtos = await connection('produtos')
+            const [count] = await db('produtos').count();
+            const produtos = await db('produtos')
                 .limit(qtdByPage)
                 .offset((page - 1) * qtdByPage)
                 .select('*')
-                .orderBy('nome', 'asc');
+                //.orderBy('nome', 'asc')
+                .orderByRaw('nome ,sabor');
             response.header('X-Total-Count', count['count(*)']);
             if (produtos) {
                 return response.status(200).json(produtos);
@@ -25,7 +26,7 @@ module.exports = {
     async create(request, response) {
         try {
             const { nome, sabor, peso, precoUnidade, qtdEmbalagem } = request.body;
-            const [id] = await connection('produtos')
+            const [id] = await db('produtos')
                 .insert({nome, sabor, peso, precoUnidade, qtdEmbalagem});
             if (id) {
                 return response.status(201).json({ id });
@@ -42,11 +43,11 @@ module.exports = {
             const { id } = request.params;
             const { nome, sabor, peso, precoUnidade, qtdEmbalagem } = request.body;
             let result = null;
-            result = await connection('produtos')
+            result = await db('produtos')
                 .where({id: id})
                 .update({ nome, sabor, peso, precoUnidade, qtdEmbalagem });
             if (result) {
-                return response.status(200).json({'data': 'Produto updated'});
+                return response.status(200).json({ id });
             } 
             return response.status(404).json({'error': 'Produto not found'});
         } catch (e) {
@@ -59,9 +60,9 @@ module.exports = {
         try {
             const { id } = request.params;
             let result = null;
-            result = await connection('produtos').where({id: id}).delete();
+            result = await db('produtos').where({id: id}).delete();
             if (result) {
-                return response.status(200).json({'data': 'Produto deleted'});
+                return response.status(200).json({ id });
             } 
             return response.status(404).send('Produto not found');
         } catch (e) {

@@ -1,24 +1,51 @@
-const connection = require('../database/connection');
+const db = require('../database/connection');
 
 module.exports = {
     async index(request, response) {
         try {
-            const qtdByPage = 10;
+            const qtdByPage = 30;
             const { page = 1 } = request.query;
-            const [count] = await connection('lotes').count();
-            const lotes = await connection('lotes')
+            const [count] = await db('lotes').count();
+            const lotes = await db('lotes')
                 .limit(qtdByPage)
                 .offset((page - 1) * qtdByPage)
                 .select('*')
                 .orderBy('dataLote', 'desc');
 
-            const promises = lotes.map(async (item, idx) => {
-                item.pedidos = await connection('lotes_pedidos')
-                    .where({lote_id: item.id})
-                    .select('pedido_id')
+            const promise = lotes.map(async (item, idx) => {
+                let umPedido;
+                //item.pedidos = 
+                umPedido = await db('lotes_pedidos')
+                    .join('pedidos', 'pedidos.id', '=', 'lotes_pedidos.pedido_id')
+                    .join('clientes', 'clientes.id', '=', 'pedidos.cliente_id')
+                    .join('vendedores', 'vendedores.id', '=', 'pedidos.vendedor_id')
+                    .where({'lotes_pedidos.lote_id': item.id})
+                    .select(['pedidos.id as pedido_id',
+                             'clientes.nome as nomeCliente',
+                             'vendedores.nome as nomeVendedor',
+                    ])
                     .orderBy('pedido_id', 'asc');
+                //console.log('UmPedido', umPedido);
+                const promise2 = umPedido.map(async (pedido, idx) => {
+                    pedido.produtos = await db('pedidos_itens')
+                        .join('produtos', 'produtos.id', '=', 'pedidos_itens.produto_id')
+                        .where({'pedidos_itens.pedido_id': pedido.pedido_id})
+                        .select(['pedidos_itens.qtd',
+                                'pedidos_itens.qtdEmbalagem',
+                                'pedidos_itens.precoUnidade',
+                                'produtos.id',
+                                'produtos.nome',
+                                'produtos.sabor',
+                                'produtos.peso',
+                        ])
+                        .orderBy('produtos.nome', 'asc');
+                });
+                await Promise.all(promise2);
+                item.pedidos = umPedido;
             });
-            await Promise.all(promises);
+            
+            await Promise.all(promise);
+
             response.header('X-Total-Count', count['count(*)']);
             if (lotes) {
                 return response.status(200).json(lotes);
@@ -33,18 +60,20 @@ module.exports = {
     async create(request, response) {
         try {
             const { dataLote, status_id, observacao, pedidos } = request.body;
+            let idInsert;
             //console.log(request.body);
-            const trx = await connection.transaction();
+            const trx = await db.transaction();
             trx('lotes')
                 .insert({dataLote, status_id, observacao})
                 .then((id) => {
+                    idInsert = id[0];
                     // Insert na tabela filho
                     pedidos.forEach((item) => item.lote_id = id[0]);
                     return trx('lotes_pedidos').insert(pedidos);
                 })
                 .then(() => {
                     trx.commit();
-                    return response.status(201).json({ 'data': 'Lote created' });
+                    return response.status(201).json({ id: idInsert });
                 })
                 .catch(() => {
                     trx.rollback();
@@ -60,7 +89,7 @@ module.exports = {
         try {
             const { id } = request.params;
             const { dataLote, status_id, observacao, pedidos } = request.body;
-            const trx = await connection.transaction();
+            const trx = await db.transaction();
             trx('lotes')
                 .where({id: id})
                 .update({dataLote, status_id, observacao})
@@ -74,7 +103,7 @@ module.exports = {
                 })
                 .then(() => {
                     trx.commit();
-                    return response.status(201).json({ 'data': 'Lote updated' });
+                    return response.status(201).json({ id });
                 })
                 .catch(() => {
                     trx.rollback();
@@ -89,7 +118,7 @@ module.exports = {
     async delete(request, response) {
         try {
             const { id } = request.params;
-            const trx = await connection.transaction();
+            const trx = await db.transaction();
             trx('lotes_pedidos')
                 .where({lote_id: id})
                 .delete()
@@ -98,7 +127,7 @@ module.exports = {
                 })
                 .then(() => {
                     trx.commit();
-                    return response.status(201).json({ 'data': 'Lote deleted' });
+                    return response.status(200).json({ id });
                 })
                 .catch(() => {
                     trx.rollback();

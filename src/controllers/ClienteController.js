@@ -1,12 +1,12 @@
-const connection = require('../database/connection');
+const db = require('../database/connection');
 
 module.exports = {
     async index(request, response) {
         try {
-            const qtdByPage = 10;
+            const qtdByPage = 30;
             const { page = 1 } = request.query;
-            const [count] = await connection('clientes').count();
-            const clientes = await connection('clientes')
+            const [count] = await db('clientes').count();
+            const clientes = await db('clientes')
                 .limit(qtdByPage)
                 .offset((page - 1) * qtdByPage)
                 .select('*')
@@ -28,7 +28,7 @@ module.exports = {
         //console.log(nome, endereco, cidade, celular);
         try {
             const { nome, endereco, cidade, celular } = request.body;
-            const [id] = await connection('clientes').insert({nome, endereco, cidade, celular,});
+            const [id] = await db('clientes').insert({nome, endereco, cidade, celular,});
             if (id) {
                 return response.status(201).json({ id });
             } 
@@ -44,11 +44,11 @@ module.exports = {
             const { id } = request.params;
             const { nome, endereco, cidade, celular } = request.body;
             let result = null;
-            result = await connection('clientes')
+            result = await db('clientes')
                 .where({id: id})
                 .update({ nome, endereco, cidade, celular, });
             if (result) {
-                return response.status(200).json({'data': 'Cliente updated'});
+                return response.status(200).json({ id });
             } 
             return response.status(404).json({'error': 'Cliente not found'});
         } catch (e) {
@@ -61,9 +61,9 @@ module.exports = {
         try {
             const { id } = request.params;
             let result = null;
-            result = await connection('clientes').where({id: id}).delete();
+            result = await db('clientes').where({id: id}).delete();
             if (result) {
-                return response.status(200).json({'data': 'Cliente deleted'});
+                return response.status(200).json({ id });
             } 
             return response.status(404).send('Cliente not found');
         } catch (e) {
@@ -71,7 +71,7 @@ module.exports = {
             return response.status(500).json({'error': 'Error in SQL'});
         }
         /* const ong_id = request.headers.authorization;
-        const incident = await connection('clientes')
+        const incident = await db('clientes')
             .where('id', id)
             .select('ong_id')
             .first();

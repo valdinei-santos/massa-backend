@@ -17,29 +17,33 @@ routes.get('/users', [checkJwt], AccountController.index);
 
 
 routes.get('/clientes', [checkJwt], ClienteController.index);
-routes.post('/clientes', ClienteController.create);
-routes.put('/clientes/:id([0-9]+)', ClienteController.update);
-routes.delete('/clientes/:id([0-9]+)', ClienteController.delete);
+//routes.get('/clientes', [], ClienteController.index);
+routes.post('/clientes', [checkJwt], ClienteController.create);
+routes.put('/clientes/:id([0-9]+)', [checkJwt], ClienteController.update);
+routes.delete('/clientes/:id([0-9]+)', [checkJwt], ClienteController.delete);
 
-routes.get('/produtos', ProdutoController.index);
-routes.post('/produtos', ProdutoController.create);
-routes.put('/produtos/:id([0-9]+)', ProdutoController.update);
-routes.delete('/produtos/:id([0-9]+)', ProdutoController.delete);
+routes.get('/produtos', [checkJwt], ProdutoController.index);
+routes.post('/produtos', [checkJwt], ProdutoController.create);
+routes.put('/produtos/:id([0-9]+)', [checkJwt], ProdutoController.update);
+routes.delete('/produtos/:id([0-9]+)', [checkJwt], ProdutoController.delete);
 
-routes.get('/vendedores', VendedorController.index);
-routes.post('/vendedores', VendedorController.create);
-routes.put('/vendedores/:id([0-9]+)', VendedorController.update);
-routes.delete('/vendedores/:id([0-9]+)', VendedorController.delete);
+routes.get('/vendedores', [checkJwt], VendedorController.index);
+routes.post('/vendedores', [checkJwt], VendedorController.create);
+routes.put('/vendedores/:id([0-9]+)', [checkJwt], VendedorController.update);
+routes.delete('/vendedores/:id([0-9]+)', [checkJwt], VendedorController.delete);
 
-routes.get('/pedidos', PedidoController.index);
-routes.post('/pedidos', PedidoController.create);
-routes.put('/pedidos/:id([0-9]+)', PedidoController.update);
-routes.delete('/pedidos/:id([0-9]+)', PedidoController.delete);
+routes.get('/pedidos', [checkJwt], PedidoController.index);
+routes.post('/pedidos', [checkJwt], PedidoController.create);
+routes.put('/pedidos/:id([0-9]+)', [checkJwt], PedidoController.update);
+routes.delete('/pedidos/:id([0-9]+)', [checkJwt], PedidoController.delete);
+routes.get('/pedidos/:id([0-9]+)/produtos', [checkJwt], PedidoController.productsPerPedido);
+routes.get('/pedidos/lista/produtos', [checkJwt], PedidoController.productsPerListaPedido);
 
-routes.get('/lotes', LoteController.index);
-routes.post('/lotes', LoteController.create);
-routes.put('/lotes/:id([0-9]+)', LoteController.update);
-routes.delete('/lotes/:id([0-9]+)', LoteController.delete);
+routes.get('/lotes', [checkJwt], LoteController.index);
+routes.post('/lotes', [checkJwt], LoteController.create);
+routes.put('/lotes/:id([0-9]+)', [checkJwt], LoteController.update);
+routes.delete('/lotes/:id([0-9]+)', [checkJwt], LoteController.delete);
+
 
 /*
 routes.get('/ongs', OngController.index);
