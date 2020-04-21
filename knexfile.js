@@ -50,8 +50,8 @@ module.exports = {
   production: {
     client: 'postgresql',
     version: '12.2',
-    //connection: process.env.DATABASE_URL,
-    connection: process.env.DB_URL,
+    connection: process.env.DATABASE_URL,
+    //connection: process.env.DB_URL,
     //searchPath: ['knex', 'public'],
     /* connection: {
       host : '127.0.0.1',

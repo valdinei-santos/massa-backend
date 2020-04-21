@@ -2,7 +2,8 @@ const connection = require('../database/connection');
 const bcrypt = require('bcryptjs');
 //const jwt = require('jwt-simple');
 const jwt = require('jsonwebtoken');
-const { JWT_SECRET } = require('../../.env');
+//const { JWT_SECRET } = require('../../.env');
+const JWT_SECRET = '#$223&*$$2a3eo32dg2kt47';
 
 module.exports = {
     async index(request, response) {
