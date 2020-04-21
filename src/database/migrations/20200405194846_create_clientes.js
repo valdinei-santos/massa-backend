@@ -7,7 +7,7 @@ exports.up = function(knex) {
         table.string('cidade', 60);
         table.string('celular', 15).notNullable();
         table.integer('fl_ativo', 1).notNullable().defaultTo(1);
-        table.integer('usuario_id');
+        table.integer('user_id');
     });
 };
 

@@ -11,7 +11,7 @@ module.exports = {
             //console.log('aqio4343')
             [count] = await db('pedidos').where('user_id', user_id).count(); 
         }
-        return count['count(*)'];
+        return count['count'];
     },
 
     async getAllPedidos(page, status) {
@@ -34,8 +34,8 @@ module.exports = {
                     .join('produtos', 'produtos.id', '=', 'pedidos_itens.produto_id')
                     .where({pedido_id: item.id})
                     .select(['pedidos_itens.qtd', 
-                                'pedidos_itens.qtdEmbalagem', 
-                                'pedidos_itens.precoUnidade',
+                                'pedidos_itens.qtd_embalagem', 
+                                'pedidos_itens.preco_unidade',
                                 'pedidos_itens.produto_id', 
                                 'produtos.nome',
                                 'produtos.sabor',
@@ -72,8 +72,8 @@ module.exports = {
                 .join('produtos', 'produtos.id', '=', 'pedidos_itens.produto_id')
                 .where({pedido_id: item.id})
                 .select(['pedidos_itens.qtd', 
-                            'pedidos_itens.qtdEmbalagem', 
-                            'pedidos_itens.precoUnidade',
+                            'pedidos_itens.qtd_embalagem', 
+                            'pedidos_itens.preco_unidade',
                             'pedidos_itens.produto_id', 
                             'produtos.nome',
                             'produtos.sabor',

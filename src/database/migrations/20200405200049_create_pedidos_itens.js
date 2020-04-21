@@ -3,14 +3,14 @@ exports.up = function(knex) {
         table.increments(); // Cria o campo ID autoincremente e já como PK.
         
         table.integer('qtd').notNullable();
-        table.integer('qtdEmbalagem').notNullable();
-        table.decimal('precoUnidade').notNullable();
+        table.integer('qtd_embalagem').notNullable();
+        table.decimal('preco_unidade').notNullable();
         //table.decimal('valorTotal').notNullable();
         
-        table.string('pedido_id').notNullable();
+        table.integer('pedido_id').notNullable();
         table.foreign('pedido_id').references('id').inTable('pedidos');
 
-        table.string('produto_id').notNullable();
+        table.integer('produto_id').notNullable();
         table.foreign('produto_id').references('id').inTable('produtos');
     });
 };

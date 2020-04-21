@@ -23,7 +23,7 @@ module.exports = {
                 .select('*')
                 .orderBy('nome', 'asc'); */
 
-            response.header('X-Total-Count', count['count(*)']);
+            response.header('X-Total-Count', count['count']);
             if (clientes) {
                 return response.status(200).json(clientes);
             } 
@@ -35,12 +35,17 @@ module.exports = {
     },
 
     async create(request, response) {
+        console.log('ClienteController - create');
         //const ong_id = request.headers.authorization;
         //console.log(request.body);
         //console.log(nome, endereco, cidade, celular);
         try {
-            const { nome, endereco, cidade, celular, usuario_id } = request.body;
-            const [id] = await db('clientes').insert({nome, endereco, cidade, celular, usuario_id});
+            const { nome, endereco, cidade, celular, fl_ativo, user_id } = request.body;
+            //console.log('ClienteController - create 2', request.body);
+            const id = await db('clientes')
+                .returning('id')
+                .insert({nome, endereco, cidade, celular, fl_ativo, user_id});
+            console.log('ClienteController - create 3', id);
             if (id) {
                 return response.status(201).json({ id });
             } 
@@ -54,11 +59,11 @@ module.exports = {
     async update(request, response) {
         try {
             const { id } = request.params;
-            const { nome, endereco, cidade, celular, usuario_id } = request.body;
+            const { nome, endereco, cidade, celular, user_id } = request.body;
             let result = null;
             result = await db('clientes')
                 .where({id: id})
-                .update({ nome, endereco, cidade, celular, usuario_id});
+                .update({ nome, endereco, cidade, celular, user_id});
             if (result) {
                 return response.status(200).json({ id });
             } 

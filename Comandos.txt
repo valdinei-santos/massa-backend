@@ -1,0 +1,42 @@
+-- Para subir o postgres no meu MAC
+pg_ctl -D /usr/local/var/postgres start
+
+-- Para deixar o postgres como um serviço. No momento não achei necessário
+brew services start postgresql
+
+-- Criar o database
+createdb dbvaldinei
+
+-- Acessar o DB criado
+psql dbvaldinei
+
+
+MIGRATIONS KNEX
+
+-- Criar uma migration
+npx knex migrate:make create_table_cliente
+
+-- Configurar o UP e DOWN da migration criado com os campos da tabela.
+
+-- Ver as migrations aplicadas
+npx knex migrate:list
+npx knex migrate:list --env production   --> Forçando o ambiente de produção
+
+-- Aplicar as migration criadas
+npx knex migrate:latest
+
+-- Rollback no ultimo Batch aplicado
+npx knex migrate:rollback
+
+-- Criar uma seed para incluir o primeiro usuario do sistema
+npx knex seed:make create_users
+
+-- Ajustar o arquivo criado para seed conforme documentação e tabela existente para o INSERT
+
+-- Rodar a seed
+npx knex seed:run 
+
+-- 
+
+
+

@@ -11,7 +11,7 @@ module.exports = {
                 .offset((page - 1) * qtdByPage)
                 .select('*')
                 .orderBy('nome', 'asc');
-            response.header('X-Total-Count', count['count(*)']);
+            response.header('X-Total-Count', count['count']);
             if (clientes) {
                 return response.status(200).json(clientes);
             } 
@@ -25,7 +25,12 @@ module.exports = {
     async create(request, response) {
         try {
             const { nomeCliente: nome, endereco, cidade, celular } = request.body;
-            const [id] = await connection('clientes').insert({nome, endereco, cidade, celular,});
+            // Sqlite
+            //const [id] = await connection('clientes').insert({nome, endereco, cidade, celular,});
+            // Postgres
+            const id = await connection('clientes')
+                .returning('id')
+                .insert({nome, endereco, cidade, celular,});
             if (id) {
                 return response.status(201).json({ id });
             } 

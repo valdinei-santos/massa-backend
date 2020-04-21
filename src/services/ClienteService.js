@@ -7,9 +7,9 @@ module.exports = {
         if (user_id == 0) {
             [count] = await db('clientes').count(); 
         } else {
-            [count] = await db('clientes').where('usuario_id', user_id).count(); 
+            [count] = await db('clientes').where('user_id', user_id).count(); 
         }
-        return count['count(*)'];
+        return count['count'];
     },
 
     async getAllClientes(page, status) {
@@ -37,7 +37,7 @@ module.exports = {
                 .limit(qtdByPage)
                 .offset((page - 1) * qtdByPage)
                 .select('*')
-                .where('usuario_id', user_id)
+                .where('user_id', user_id)
                 .orderBy('nome', 'asc');
             return clientes;
         } catch (e) {

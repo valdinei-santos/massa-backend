@@ -15,7 +15,7 @@ module.exports = {
                 .offset((page - 1) * qtdByPage)
                 .select('*')
                 .orderBy('nome', 'asc');
-            response.header('X-Total-Count', count['count(*)']);
+            response.header('X-Total-Count', count['count']);
             if (users) {
                 return response.status(200).json(users);
             } 
@@ -33,7 +33,8 @@ module.exports = {
             const salt = bcrypt.genSaltSync(10);
             const hash = bcrypt.hashSync(password, salt);
             
-            const [id] = await connection('users')
+            const id = await connection('users')
+                .returning('id')
                 .insert({email, password: hash, nome, fl_admin, fl_vendedor, fl_usuario, fl_ativo});
             if (id) {
                 return response.status(201).json({ id });

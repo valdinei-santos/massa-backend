@@ -10,7 +10,7 @@ exports.seed = function(knex) {
         {id: 1, email: 'valdinei@previg.org.br', password: newPassord, nome: 'Valdinei', 
          fl_admin: 1, fl_vendedor: 0, fl_usuario: 0, fl_ativo: 1
         },
-        {id: 2, email: 'joao@joao.com.br', password: newPassord, nome: 'Joao', 
+        {id: 2, email: 'j@j.com', password: newPassord, nome: 'Joao', 
          fl_admin: 0, fl_vendedor: 0, fl_usuario: 1, fl_ativo: 1
         },
       ]);

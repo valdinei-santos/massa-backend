@@ -11,7 +11,7 @@ module.exports = {
                 .offset((page - 1) * qtdByPage)
                 .select('*')
                 .orderBy('nome', 'asc');
-            response.header('X-Total-Count', count['count(*)']);
+            response.header('X-Total-Count', count['count']);
             if (vendedores) {
                 return response.status(200).json(vendedores);
             } 
@@ -24,8 +24,10 @@ module.exports = {
 
     async create(request, response) {
         try {
-            const { nome, endereco, cidade, celular } = request.body;
-            const [id] = await connection('vendedores').insert({nome, celular,});
+            const { nome, celular } = request.body;
+            const id = await connection('vendedores')
+                .returning('id')
+                .insert({nome, celular,});
             if (id) {
                 return response.status(201).json({ id });
             } 

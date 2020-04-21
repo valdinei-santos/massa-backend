@@ -8,7 +8,13 @@ module.exports = {
             const [count] = await db('produtos').count();
             let produtos;
             if (page === 0) {
-                produtos = await db('produtos').select('*').orderByRaw('nome ,sabor');
+                produtos = await db('produtos').select('*').orderByRaw('nome, sabor');
+                /* produtos = await db.raw(
+                    `select id, nome, sabor, peso, preco_unidade, to_char(preco_unidade, '99D99'), qtd_embalagem, fl_ativo
+                       from produtos 
+                      order by nome, sabor
+                    `, []); */
+                //console.log(produtos.rows);
             } else {
                 produtos = await db('produtos')
                 .limit(qtdByPage)
@@ -17,7 +23,7 @@ module.exports = {
                 //.orderBy('nome', 'asc')
                 .orderByRaw('nome ,sabor');
             }
-            response.header('X-Total-Count', count['count(*)']);
+            response.header('X-Total-Count', count['count']);
             if (produtos) {
                 return response.status(200).json(produtos);
             } 
@@ -30,9 +36,10 @@ module.exports = {
 
     async create(request, response) {
         try {
-            const { nome, sabor, peso, precoUnidade, qtdEmbalagem } = request.body;
-            const [id] = await db('produtos')
-                .insert({nome, sabor, peso, precoUnidade, qtdEmbalagem});
+            const { nome, sabor, peso, preco_unidade, qtd_embalagem } = request.body;
+            const id = await db('produtos')
+                .returning('id')
+                .insert({nome, sabor, peso, preco_unidade, qtd_embalagem});
             if (id) {
                 return response.status(201).json({ id });
             } 
@@ -46,11 +53,11 @@ module.exports = {
     async update(request, response) {
         try {
             const { id } = request.params;
-            const { nome, sabor, peso, precoUnidade, qtdEmbalagem } = request.body;
+            const { nome, sabor, peso, preco_unidade, qtd_embalagem } = request.body;
             let result = null;
             result = await db('produtos')
                 .where({id: id})
-                .update({ nome, sabor, peso, precoUnidade, qtdEmbalagem });
+                .update({ nome, sabor, peso, preco_unidade, qtd_embalagem });
             if (result) {
                 return response.status(200).json({ id });
             } 

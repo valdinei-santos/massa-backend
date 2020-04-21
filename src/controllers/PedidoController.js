@@ -12,7 +12,6 @@ module.exports = {
                 newStatus = [status];
             }
             const count = await pedidoService.getCountPedidos(user_id);
-            console.log('COUTN', count);
             let pedidos;
             if (user_id == 0) {
                 //pedidos = await pedidoService.getAllPedidos(page, newStatus);
@@ -48,8 +47,8 @@ module.exports = {
                     .join('produtos', 'produtos.id', '=', 'pedidos_itens.produto_id')
                     .where({pedido_id: item.id})
                     .select(['pedidos_itens.qtd', 
-                             'pedidos_itens.qtdEmbalagem', 
-                             'pedidos_itens.precoUnidade',
+                             'pedidos_itens.qtd_embalagem', 
+                             'pedidos_itens.preco_unidade',
                              'pedidos_itens.produto_id', 
                              'produtos.nome',
                              'produtos.sabor',
@@ -73,16 +72,18 @@ module.exports = {
 
     async create(request, response) {
         try {
-            const { dataPedido, status_id, pago, observacao, cliente_id, user_id, itens } = request.body;
+            const { dt_pedido, status_id, pago, observacao, cliente_id, user_id, itens } = request.body;
             let idInsert;
             const trx = await db.transaction();
             trx('pedidos')
-                .insert({dataPedido, status_id, pago, observacao, cliente_id, user_id})
+                .returning('id')
+                .insert({dt_pedido, status_id, pago, observacao, cliente_id, user_id})
                 .then((id) => {
-                    idInsert = id[0];
+                    idInsert = Number(id);
                     // Insert na tabela filho
                     itens.forEach((item) => {
-                        item.pedido_id = id[0];
+                        item.pedido_id = idInsert;
+                        item.preco_unidade = Number(item.preco_unidade)
                         delete item.nome;
                         delete item.sabor;
                         delete item.peso;
@@ -106,11 +107,11 @@ module.exports = {
     async update(request, response) {
         try {
             const { id } = request.params;
-            const { dataPedido, status_id, pago, observacao, cliente_id, user_id, itens } = request.body;
+            const { dt_pedido, status_id, pago, observacao, cliente_id, user_id, itens } = request.body;
             const trx = await db.transaction();
             trx('pedidos')
                 .where({id: id})
-                .update({dataPedido, status_id, pago, observacao, cliente_id, user_id})
+                .update({dt_pedido, status_id, pago, observacao, cliente_id, user_id})
                 .then(() => {
                     return trx('pedidos_itens').where({pedido_id: id}).delete();
                 })
@@ -128,11 +129,11 @@ module.exports = {
                     return response.status(400).json({'error': 'Pedido not updated'});
                 });
             /* const { id } = request.params;
-            const { dataPedido, status_id, pago, observacao, cliente_id, vendedor_id } = request.body;
+            const { dt_pedido, status_id, pago, observacao, cliente_id, vendedor_id } = request.body;
             let result = null;
             result = await db('peiddos')
                 .where({id: id})
-                .update({ dataPedido, status_id, pago, observacao, cliente_id, vendedor_id });
+                .update({ dt_pedido, status_id, pago, observacao, cliente_id, vendedor_id });
             if (result) {
                 return response.status(200).json({'data': 'Pedido updated'});
             } 
@@ -166,9 +167,9 @@ module.exports = {
                         .join('produtos', 'produtos.id', '=', 'pedidos_itens.produto_id')
                         .where('pedidos_itens.pedido_id', id)
                         .select(['pedidos_itens.qtd',
-                                'produtos.qtdEmbalagem', 
-                                'produtos.precoUnidade', 
-                                db.raw('(pedidos_itens.qtd * (pedidos_itens.qtdEmbalagem * pedidos_itens.precoUnidade) ) as precoEmbalagem' ),
+                                'produtos.qtd_embalagem', 
+                                'produtos.preco_unidade', 
+                                db.raw('(pedidos_itens.qtd * (pedidos_itens.qtd_embalagem * pedidos_itens.preco_unidade) ) as precoEmbalagem' ),
                                 'produtos.id',
                                 'produtos.nome',
                                 'produtos.sabor',
@@ -195,13 +196,13 @@ module.exports = {
                         .join('produtos', 'produtos.id', '=', 'pedidos_itens.produto_id')
                         .whereIn('pedidos_itens.pedido_id', listaPedidos)
                         .select([db.raw('sum(pedidos_itens.qtd) as qtd'),
-                                 db.raw('sum(pedidos_itens.qtd * (pedidos_itens.qtdEmbalagem * pedidos_itens.precoUnidade) ) as total' ),
+                                 db.raw('sum(pedidos_itens.qtd * (pedidos_itens.qtd_embalagem * pedidos_itens.preco_unidade) ) as total' ),
                                 'produtos.id',
                                 'produtos.nome',
                                 'produtos.sabor',
                                 'produtos.peso',
-                                'produtos.qtdEmbalagem',
-                                'produtos.precoUnidade'])
+                                'produtos.qtd_embalagem',
+                                'produtos.preco_unidade'])
                         .groupByRaw('produtos.id')
                         .orderBy('produtos.nome', 'asc');
             if (produtos) {

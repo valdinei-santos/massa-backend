@@ -31,8 +31,8 @@ module.exports = {
                         .join('produtos', 'produtos.id', '=', 'pedidos_itens.produto_id')
                         .where({'pedidos_itens.pedido_id': pedido.pedido_id})
                         .select(['pedidos_itens.qtd',
-                                'pedidos_itens.qtdEmbalagem',
-                                'pedidos_itens.precoUnidade',
+                                'pedidos_itens.qtd_embalagem',
+                                'pedidos_itens.preco_unidade',
                                 'produtos.id',
                                 'produtos.nome',
                                 'produtos.sabor',
@@ -46,7 +46,7 @@ module.exports = {
             
             await Promise.all(promise);
 
-            response.header('X-Total-Count', count['count(*)']);
+            response.header('X-Total-Count', count['count']);
             if (lotes) {
                 return response.status(200).json(lotes);
             } 
@@ -59,15 +59,16 @@ module.exports = {
 
     async create(request, response) {
         try {
-            const { dataLote, status_id, observacao, pedidos } = request.body;
+            const { dt_lote, status_id, observacao, pedidos } = request.body;
             let idInsert;
             const trx = await db.transaction();
             trx('lotes')
-                .insert({dataLote, status_id, observacao})
+                .returning('id')
+                .insert({dt_lote, status_id, observacao})
                 .then((id) => {
-                    idInsert = id[0];
+                    idInsert = Number(id);
                     // Insert na tabela filho
-                    pedidos.forEach((item) => item.lote_id = id[0]);
+                    pedidos.forEach((item) => item.lote_id = idInsert);
                     const promise1 = trx('lotes_pedidos').insert(pedidos);
                     const promise2 = pedidos.map(async (item) => {
                         await trx('pedidos')
@@ -92,7 +93,7 @@ module.exports = {
             //console.log(request.body);
             /* const trx = await db.transaction();
             trx('lotes')
-                .insert({dataLote, status_id, observacao})
+                .insert({dt_lote, status_id, observacao})
                 .then((id) => {
                     idInsert = id[0];
                     // Insert na tabela filho
@@ -123,11 +124,11 @@ module.exports = {
     async update(request, response) {
         try {
             const { id } = request.params;
-            const { dataLote, status_id, observacao, pedidos } = request.body;
+            const { dt_lote, status_id, observacao, pedidos } = request.body;
             const trx = await db.transaction();
             trx('lotes')
                 .where({id: id})
-                .update({dataLote, status_id, observacao})
+                .update({dt_lote, status_id, observacao})
                 .then(() => {
                     return trx('lotes_pedidos').where({lote_id: id}).delete();
                 })
