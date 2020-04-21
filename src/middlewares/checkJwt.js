@@ -1,7 +1,8 @@
 //const { Request, Response, NextFunction } = require('express');
 const jwt = require('jsonwebtoken');
 //const logger = require('../config/winston');
-const { JWT_SECRET } = require('../../.env');
+//const { JWT_SECRET } = require('../../.env');
+const JWT_SECRET = '#$223&*$$2a3eo32dg2kt47';
 
 module.exports = function checkJwt(req, res, next) {
     //Get the jwt token from the head
