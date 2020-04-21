@@ -52,7 +52,7 @@ module.exports = {
                 return response.status(400).send('Dados incompletos');
             }
             const user = await connection('users')
-                .where({ email })
+                .where({ email, fl_ativo: 1 })
                 .first();
             if (user) {
                 result = bcrypt.compareSync(password, user.password); // Irá retornar true.
@@ -63,6 +63,8 @@ module.exports = {
                         { expiresIn: "1h" }
                     );
                     return response.status(200).json({
+                        id: user.id,
+                        admin: user.fl_admin,
                         name: user.nome,
                         email: user.email,
                         token: token

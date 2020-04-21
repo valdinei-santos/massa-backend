@@ -14,8 +14,8 @@ exports.up = function(knex) {
         table.foreign('cliente_id').references('id').inTable('clientes');
 
         // table.string('nomeVendedor');
-        table.string('vendedor_id').notNullable();
-        table.foreign('vendedor_id').references('id').inTable('vendedores');
+        table.string('user_id').notNullable();
+        table.foreign('user_id').references('id').inTable('users');
     });
 };
 

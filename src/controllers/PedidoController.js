@@ -1,21 +1,48 @@
 const db = require('../database/connection');
+const pedidoService = require('../services/PedidoService');
 
 module.exports = {
     async index(request, response) {
         try {
-            const qtdByPage = 30;
-            const { page = 1 } = request.query;
+            const { page = 1, status = 0, user_id = 0 } = request.query;
+            let newStatus;
+            if (status === 0) {
+                newStatus = [1,2,3];
+            } else {
+                newStatus = [status];
+            }
+            const count = await pedidoService.getCountPedidos(user_id);
+            console.log('COUTN', count);
+            let pedidos;
+            if (user_id == 0) {
+                //pedidos = await pedidoService.getAllPedidos(page, newStatus);
+                pedidos = await pedidoService.getAllPedidos(page, newStatus)
+            } else {
+                pedidos = await pedidoService.getUserPedidos(page, newStatus, user_id);
+            }
+            //console.log('PED5: ', pedidos);
+            
+
+            /* const qtdByPage = 30;
+            const { page = 1, status = 0, user_id = 0 } = request.query;
             const [count] = await db('pedidos').count();
+            let newStatus;
+            if (status === 0) {
+                newStatus = [1,2,3];
+            } else {
+                newStatus = [status];
+            }
             const pedidos = await db('pedidos')
                 .join('clientes', 'clientes.id', '=', 'pedidos.cliente_id')
-                .join('vendedores', 'vendedores.id', '=', 'pedidos.vendedor_id')
+                .join('users', 'users.id', '=', 'pedidos.user_id')
                 .limit(qtdByPage)
                 .offset((page - 1) * qtdByPage)
                 .select(['pedidos.*', 
                          'clientes.nome as nomeCliente',
-                         'vendedores.nome as nomeVendedor'
+                         'users.nome as nomeVendedor'
                 ])
-                .orderBy('dataPedido', 'desc');
+                .whereIn('status_id', newStatus)
+                .orderBy('id', 'desc');
             const promises = pedidos.map(async (item, idx) => {
                 item.itens = await db('pedidos_itens')
                     .join('produtos', 'produtos.id', '=', 'pedidos_itens.produto_id')
@@ -30,12 +57,14 @@ module.exports = {
                     ])
                     .orderBy('produto_id', 'asc');
                 });
-            await Promise.all(promises);
-            response.header('X-Total-Count', count['count(*)']);
+            await Promise.all(promises); */
+         
+            
+            response.header('X-Total-Count', count);
             if (pedidos) {
                 return response.status(200).json(pedidos);
             } 
-            return response.status(400).json({'error': 'Clientes not found'});
+            return response.status(400).json({'error': 'Pedidos not found'});
         } catch (e) {
             console.log('Erro: ' + e);
             return response.status(500).json({'error': 'Error in SQL'});
@@ -44,15 +73,20 @@ module.exports = {
 
     async create(request, response) {
         try {
-            const { dataPedido, status_id, pago, observacao, cliente_id, vendedor_id, itens } = request.body;
+            const { dataPedido, status_id, pago, observacao, cliente_id, user_id, itens } = request.body;
             let idInsert;
             const trx = await db.transaction();
             trx('pedidos')
-                .insert({dataPedido, status_id, pago, observacao, cliente_id, vendedor_id})
+                .insert({dataPedido, status_id, pago, observacao, cliente_id, user_id})
                 .then((id) => {
                     idInsert = id[0];
                     // Insert na tabela filho
-                    itens.forEach((item) => item.pedido_id = id[0]);
+                    itens.forEach((item) => {
+                        item.pedido_id = id[0];
+                        delete item.nome;
+                        delete item.sabor;
+                        delete item.peso;
+                    });
                     return trx('pedidos_itens').insert(itens);
                 })
                 .then(() => {
@@ -72,11 +106,11 @@ module.exports = {
     async update(request, response) {
         try {
             const { id } = request.params;
-            const { dataPedido, status_id, pago, observacao, cliente_id, vendedor_id, itens } = request.body;
+            const { dataPedido, status_id, pago, observacao, cliente_id, user_id, itens } = request.body;
             const trx = await db.transaction();
             trx('pedidos')
                 .where({id: id})
-                .update({dataPedido, status_id, pago, observacao, cliente_id, vendedor_id})
+                .update({dataPedido, status_id, pago, observacao, cliente_id, user_id})
                 .then(() => {
                     return trx('pedidos_itens').where({pedido_id: id}).delete();
                 })

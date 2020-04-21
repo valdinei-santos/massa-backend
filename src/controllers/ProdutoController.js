@@ -4,14 +4,19 @@ module.exports = {
     async index(request, response) {
         try {
             const qtdByPage = 30;
-            const { page = 1 } = request.query;
+            const { page = 0 } = request.query;
             const [count] = await db('produtos').count();
-            const produtos = await db('produtos')
+            let produtos;
+            if (page === 0) {
+                produtos = await db('produtos').select('*').orderByRaw('nome ,sabor');
+            } else {
+                produtos = await db('produtos')
                 .limit(qtdByPage)
                 .offset((page - 1) * qtdByPage)
                 .select('*')
                 //.orderBy('nome', 'asc')
                 .orderByRaw('nome ,sabor');
+            }
             response.header('X-Total-Count', count['count(*)']);
             if (produtos) {
                 return response.status(200).json(produtos);

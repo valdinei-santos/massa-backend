@@ -1,16 +1,28 @@
 const db = require('../database/connection');
+const clienteService = require('../services/ClienteService');
 
 module.exports = {
     async index(request, response) {
         try {
-            const qtdByPage = 30;
+            const { page = 1, user_id = 0 } = request.query;
+            const count = await clienteService.getCountClientes(user_id);
+            let clientes;
+            if (user_id == 0) {
+                //pedidos = await clienteService.getAllPedidos(page, newStatus);
+                clientes = await clienteService.getAllClientes(page)
+            } else {
+                clientes = await clienteService.getUserClientes(page, user_id);
+            }
+
+            /* const qtdByPage = 30;
             const { page = 1 } = request.query;
             const [count] = await db('clientes').count();
             const clientes = await db('clientes')
                 .limit(qtdByPage)
                 .offset((page - 1) * qtdByPage)
                 .select('*')
-                .orderBy('nome', 'asc');
+                .orderBy('nome', 'asc'); */
+
             response.header('X-Total-Count', count['count(*)']);
             if (clientes) {
                 return response.status(200).json(clientes);
@@ -27,8 +39,8 @@ module.exports = {
         //console.log(request.body);
         //console.log(nome, endereco, cidade, celular);
         try {
-            const { nome, endereco, cidade, celular } = request.body;
-            const [id] = await db('clientes').insert({nome, endereco, cidade, celular,});
+            const { nome, endereco, cidade, celular, usuario_id } = request.body;
+            const [id] = await db('clientes').insert({nome, endereco, cidade, celular, usuario_id});
             if (id) {
                 return response.status(201).json({ id });
             } 
@@ -42,11 +54,11 @@ module.exports = {
     async update(request, response) {
         try {
             const { id } = request.params;
-            const { nome, endereco, cidade, celular } = request.body;
+            const { nome, endereco, cidade, celular, usuario_id } = request.body;
             let result = null;
             result = await db('clientes')
                 .where({id: id})
-                .update({ nome, endereco, cidade, celular, });
+                .update({ nome, endereco, cidade, celular, usuario_id});
             if (result) {
                 return response.status(200).json({ id });
             } 

@@ -10,7 +10,7 @@ module.exports = {
                 .limit(qtdByPage)
                 .offset((page - 1) * qtdByPage)
                 .select('*')
-                .orderBy('dataLote', 'desc');
+                .orderBy('id', 'desc');
 
             const promise = lotes.map(async (item, idx) => {
                 let umPedido;
@@ -18,11 +18,11 @@ module.exports = {
                 umPedido = await db('lotes_pedidos')
                     .join('pedidos', 'pedidos.id', '=', 'lotes_pedidos.pedido_id')
                     .join('clientes', 'clientes.id', '=', 'pedidos.cliente_id')
-                    .join('vendedores', 'vendedores.id', '=', 'pedidos.vendedor_id')
+                    .join('users', 'users.id', '=', 'pedidos.user_id')
                     .where({'lotes_pedidos.lote_id': item.id})
                     .select(['pedidos.id as pedido_id',
                              'clientes.nome as nomeCliente',
-                             'vendedores.nome as nomeVendedor',
+                             'users.nome as nomeVendedor',
                     ])
                     .orderBy('pedido_id', 'asc');
                 //console.log('UmPedido', umPedido);
@@ -61,8 +61,36 @@ module.exports = {
         try {
             const { dataLote, status_id, observacao, pedidos } = request.body;
             let idInsert;
-            //console.log(request.body);
             const trx = await db.transaction();
+            trx('lotes')
+                .insert({dataLote, status_id, observacao})
+                .then((id) => {
+                    idInsert = id[0];
+                    // Insert na tabela filho
+                    pedidos.forEach((item) => item.lote_id = id[0]);
+                    const promise1 = trx('lotes_pedidos').insert(pedidos);
+                    const promise2 = pedidos.map(async (item) => {
+                        await trx('pedidos')
+                        .where({id: item.pedido_id})
+                        .update({status_id: 2});
+                    });
+                    Promise.all([promise1, promise2])
+                        .then(() => {
+                            trx.commit();
+                            return response.status(201).json({ id: idInsert });
+                        });
+                })
+                /* .then(() => {
+                    trx.commit();
+                    return response.status(201).json({ id: idInsert });
+                }) */
+                .catch(() => {
+                    trx.rollback();
+                    return response.status(400).json({'error': 'Lote not created'});
+                });
+
+            //console.log(request.body);
+            /* const trx = await db.transaction();
             trx('lotes')
                 .insert({dataLote, status_id, observacao})
                 .then((id) => {
@@ -72,13 +100,20 @@ module.exports = {
                     return trx('lotes_pedidos').insert(pedidos);
                 })
                 .then(() => {
+                    pedidos.map( async (item) => {
+                        await trx('pedidos')
+                        .where({id: item.pedido_id})
+                        .update({status_id: 2});
+                    })
+                })
+                .then(() => {
                     trx.commit();
                     return response.status(201).json({ id: idInsert });
                 })
                 .catch(() => {
                     trx.rollback();
                     return response.status(400).json({'error': 'Lote not created'});
-                });
+                }); */
         } catch (err) {
             console.log('Erro: ' + err);
             return response.status(500).json({'error': 'Error in SQL'});
