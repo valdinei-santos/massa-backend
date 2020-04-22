@@ -1,3 +1,5 @@
+POSTGRES 
+
 -- Para subir o postgres no meu MAC
 pg_ctl -D /usr/local/var/postgres start
 
@@ -10,6 +12,9 @@ createdb dbvaldinei
 -- Acessar o DB criado
 psql dbvaldinei
 
+-- Para criar a variavel de ambiente do DB. Enquanto nao faço isso da forma certa
+export DB_URL=postgres://127.0.0.1:5432/dbvaldinei
+
 
 MIGRATIONS KNEX
 
@@ -20,7 +25,7 @@ npx knex migrate:make create_table_cliente
 
 -- Ver as migrations aplicadas
 npx knex migrate:list
-npx knex migrate:list --env production   --> Forçando o ambiente de produção
+npx knex migrate:list --env production   --> Para o ambiente de produção
 
 -- Aplicar as migration criadas
 npx knex migrate:latest
@@ -39,4 +44,16 @@ npx knex seed:run
 -- 
 
 
+HEROKU  -- URL da app https://massa-backend.herokuapp.com/
+
+-- Exemplo de variavel de ambiente sendo setada no Heroku
+heroku config:set URL_DB=xxxx
+
+-- Acessar o bash da app no Heroku
+heroku run bash
+
+-- Acessar DB PostgreSQL
+heroku pg:psql
+
+-- 
 

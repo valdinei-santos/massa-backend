@@ -27,8 +27,8 @@ module.exports = {
                             'clientes.nome as nomeCliente',
                             'users.nome as nomeVendedor'
                 ])
-                .whereIn('status_id', status)
-                .orderBy('id', 'desc');
+                .whereIn('pedidos.status_id', status)
+                .orderBy('pedido.id', 'desc');
             const promises = pedidos.map(async (item, idx) => {
                 item.itens = await db('pedidos_itens')
                     .join('produtos', 'produtos.id', '=', 'pedidos_itens.produto_id')
@@ -41,7 +41,7 @@ module.exports = {
                                 'produtos.sabor',
                                 'produtos.peso',
                     ])
-                    .orderBy('produto_id', 'asc');
+                    .orderBy('produtos.produto_id', 'asc');
                 });
             await Promise.all(promises);
             return pedidos;

@@ -17,6 +17,32 @@ module.exports = {
     debug: true,
   }, */
 
+  development: {
+    client: 'postgresql',
+    version: '12.2',
+    //connection: process.env.DB_URL,
+    //searchPath: ['knex', 'public'],
+    connection: {
+      host : '127.0.0.1',
+      database: 'dbvaldinei',
+      user:     'valdinei',
+      password: 'als0304'
+    },
+    pool: {
+      min: 2,
+      max: 10
+    },
+    migrations: {
+        directory: './src/database/migrations',
+        tableName: 'knex_migrations'
+      },
+      seeds: {
+          directory: './src/database/seeds'
+      },
+      useNullAsDefault: true,
+      debug: false,
+  },
+
   test: {
     client: 'sqlite3',
     connection: {
