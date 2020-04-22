@@ -32,7 +32,7 @@ module.exports = {
             const promises = pedidos.map(async (item, idx) => {
                 item.itens = await db('pedidos_itens')
                     .join('produtos', 'produtos.id', '=', 'pedidos_itens.produto_id')
-                    .where('pedidos.pedido_id', item.id)
+                    .where('pedidos_itens.pedido_id', item.id)
                     .select(['pedidos_itens.qtd', 
                                 'pedidos_itens.qtd_embalagem', 
                                 'pedidos_itens.preco_unidade',
@@ -70,7 +70,7 @@ module.exports = {
         const promises = pedidos.map(async (item, idx) => {
             item.itens = await db('pedidos_itens')
                 .join('produtos', 'produtos.id', '=', 'pedidos_itens.produto_id')
-                .where({pedido_id: item.id})
+                .where('pedidos_itens.pedido_id', item.id)
                 .select(['pedidos_itens.qtd', 
                             'pedidos_itens.qtd_embalagem', 
                             'pedidos_itens.preco_unidade',
