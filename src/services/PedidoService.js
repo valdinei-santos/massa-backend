@@ -41,7 +41,7 @@ module.exports = {
                                 'produtos.sabor',
                                 'produtos.peso',
                     ])
-                    .orderBy('produtos.produto_id', 'asc');
+                    .orderBy('pedidos_itens.produto_id', 'asc');
                 });
             await Promise.all(promises);
             return pedidos;
@@ -79,7 +79,7 @@ module.exports = {
                             'produtos.sabor',
                             'produtos.peso',
                 ])
-                .orderBy('produtos.produto_id', 'asc');
+                .orderBy('pedidos_itens.produto_id', 'asc');
             });
         await Promise.all(promises);
         return pedidos;
