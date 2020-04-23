@@ -215,4 +215,22 @@ module.exports = {
         }
     },
 
+    async alterStatus(request, response) {
+        try {
+            const { id } = request.params;
+            const { status_id } = request.body;
+            let result = null;
+            result = await db('pedidos')
+                .where({id: id})
+                .update({ status_id });
+            if (result) {
+                return response.status(200).json({ id });
+            } 
+            return response.status(404).json({'error': 'Status not altered'});
+        } catch (e) {
+            console.log('Erro: ' + e);
+            return response.status(500).json({'error': 'Error in SQL'});
+        }        
+    },
+
 }

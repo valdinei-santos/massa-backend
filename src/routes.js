@@ -38,6 +38,7 @@ routes.put('/pedidos/:id([0-9]+)', [checkJwt], PedidoController.update);
 routes.delete('/pedidos/:id([0-9]+)', [checkJwt], PedidoController.delete);
 routes.get('/pedidos/:id([0-9]+)/produtos', [checkJwt], PedidoController.productsPerPedido);
 routes.get('/pedidos/lista/produtos', [checkJwt], PedidoController.productsPerListaPedido);
+routes.put('/pedidos/:id([0-9]+)/status', [checkJwt], PedidoController.alterStatus);
 
 routes.get('/lotes', [checkJwt], LoteController.index);
 routes.post('/lotes', [checkJwt], LoteController.create);
