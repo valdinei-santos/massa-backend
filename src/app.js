@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 dotenv.config();
-console.log('VAR1', process.env.DATABASE_URL)
+//console.log('VAR1', process.env.DATABASE_URL)
 const { errors } = require('celebrate');
 const routes = require('./routes');
 
