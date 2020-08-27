@@ -48,6 +48,7 @@ module.exports = {
     },
 
     async login(request, response) {
+        console.log('AccountController - login')
         try {
             const { email, password } = request.body;
             if(!email || !password){
@@ -56,7 +57,6 @@ module.exports = {
             const user = await connection('users')
                 .where({ email, fl_ativo: 1 })
                 .first();
-                console.log('passou 2')
             if (user) {
                 result = bcrypt.compareSync(password, user.password); // Irá retornar true.
                 if (result) {

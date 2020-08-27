@@ -36,7 +36,7 @@ module.exports = {
                     .select(['pedidos_itens.qtd', 
                                 'pedidos_itens.qtd_embalagem', 
                                 'pedidos_itens.preco_unidade',
-                                'pedidos_itens.produto_id', 
+                                'pedidos_itens.produto_id as id', 
                                 'produtos.nome',
                                 'produtos.sabor',
                                 'produtos.peso',

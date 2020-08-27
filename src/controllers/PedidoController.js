@@ -148,11 +148,27 @@ module.exports = {
         try {
             const { id } = request.params;
             let result = null;
-            result = await db('pedidos').where({id: id}).delete();
+            const trx = await db.transaction();
+            trx('pedidos_itens')
+                .where({pedido_id: id})
+                .delete()
+                .then(() => {
+                    return trx('pedidos').where({id: id}).delete();
+                })
+                .then(() => {
+                    trx.commit();
+                    return response.status(200).json({ id });
+                })
+                .catch(() => {
+                    trx.rollback();
+                    return response.status(400).json({'error': 'Pedido not deleted'});
+                });
+
+            /* result = await db('pedidos').where({id: id}).delete();
             if (result) {
                 return response.status(200).json({ id });
             } 
-            return response.status(404).send('Pedido not found');
+            return response.status(404).send('Pedido not found'); */
         } catch (e) {
             console.log('Erro: ' + e);
             return response.status(500).json({'error': 'Error in SQL'});

@@ -40,7 +40,7 @@ module.exports = {
         directory: './src/database/seeds'
     },
     useNullAsDefault: true,
-    debug: false,
+    debug: true,
   },
 
   test: {

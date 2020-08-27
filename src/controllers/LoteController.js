@@ -1,4 +1,5 @@
 const db = require('../database/connection');
+const db_pg = require('../database/connection_pg');
 
 module.exports = {
     async index(request, response) {
@@ -125,22 +126,50 @@ module.exports = {
         try {
             const { id } = request.params;
             const { dt_lote, status_id, observacao, pedidos } = request.body;
+
             const trx = await db.transaction();
             trx('lotes')
                 .where({id: id})
                 .update({dt_lote, status_id, observacao})
+                .then(async () => {
+                    return trx('lotes_pedidos')
+                        .select('pedido_id')
+                        .where('lote_id', id)
+                        .then((res) => {
+                            console.log('RES PEDIDOS LOTE', res);
+                            res.map(async (item) => {
+                                console.log('ITEM: ', item);
+                                return trx('pedidos')
+                                    .where('id', item.pedido_id)
+                                    .update({ status_id: 1 });
+                            });
+                        })
+                })
                 .then(() => {
                     return trx('lotes_pedidos').where({lote_id: id}).delete();
                 })
                 .then(() => {
                     // Insert na tabela filho
                     pedidos.forEach((item) => item.lote_id = id);
-                    return trx('lotes_pedidos').insert(pedidos);
+
+                    const promise1 = trx('lotes_pedidos').insert(pedidos);
+                    const promise2 = pedidos.map(async (item) => {
+                        await trx('pedidos')
+                        .where({id: item.pedido_id})
+                        .update({status_id: 2});
+                    });
+                    Promise.all([promise1, promise2])
+                        .then(() => {
+                            trx.commit();
+                            return response.status(200).json({ id });
+                        });
+
+                    //return trx('lotes_pedidos').insert(pedidos);
                 })
-                .then(() => {
+                /* .then(() => {
                     trx.commit();
-                    return response.status(201).json({ id });
-                })
+                    return response.status(200).json({ id });
+                }) */
                 .catch(() => {
                     trx.rollback();
                     return response.status(400).json({'error': 'Lote not created'});
