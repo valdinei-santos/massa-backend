@@ -75,7 +75,22 @@ module.exports = {
     },
 
     async delete(request, response) {
-        try {
+			// Antes excluia, mas agora só seta o fl_ativo para 0
+			try {
+				const { id } = request.params;
+				let result = null;
+				result = await db('clientes')
+						.where({id: id})
+						.update({ fl_ativo: 0 });
+				if (result) {
+						return response.status(200).json({ id });
+				} 
+				return response.status(404).json({'error': 'Cliente not found'});
+			} catch (e) {
+					console.log('Erro: ' + e);
+					return response.status(500).json({'error': 'Error in SQL'});
+			}
+        /* try {
             const { id } = request.params;
             let result = null;
             result = await db('clientes').where({id: id}).delete();
@@ -86,15 +101,8 @@ module.exports = {
         } catch (e) {
             console.log('Erro: ' + e);
             return response.status(500).json({'error': 'Error in SQL'});
-        }
-        /* const ong_id = request.headers.authorization;
-        const incident = await db('clientes')
-            .where('id', id)
-            .select('ong_id')
-            .first();
-        if (incident.ong_id !== ong_id) {
-            return response.status(401).json({ error: "Operation not permitted." });
         } */
+        
     }
 
 }

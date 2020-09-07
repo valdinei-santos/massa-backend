@@ -161,7 +161,7 @@ module.exports = {
                 })
                 .catch(() => {
                     trx.rollback();
-                    return response.status(400).json({'error': 'Pedido not deleted'});
+                    return response.status(403).json({'error': 'Pedido not deleted'});
                 });
 
             /* result = await db('pedidos').where({id: id}).delete();
