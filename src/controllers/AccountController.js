@@ -45,6 +45,43 @@ module.exports = {
             console.log('Erro: ' + e);
             return response.status(500).json({'error': 'Error in SQL'});
         }
+		},
+		
+		async update(request, response) {
+			try {
+				  const { id } = request.params;
+					const { email, password, nome, fl_admin, fl_vendedor, fl_usuario, fl_ativo } = request.body;
+					const salt = bcrypt.genSaltSync(10);
+					const hash = bcrypt.hashSync(password, salt);
+					
+					const result = await connection('users')
+					    .where({id: id})
+							.update({email, password: hash, nome, fl_admin, fl_vendedor, fl_usuario, fl_ativo});
+					if (result) {
+							return response.status(200).json({ id });
+					} 
+					return response.status(404).json({'error': 'User not updated'});
+			} catch (e) {
+					console.log('Erro: ' + e);
+					return response.status(500).json({'error': 'Error in SQL'});
+			}
+		},
+		
+		async delete(request, response) {
+			try {
+				const { id } = request.params;
+				let result = null;
+				result = await db('users')
+						.where({id: id})
+						.update({ fl_ativo: 0 });
+				if (result) {
+						return response.status(200).json({ id });
+				} 
+				return response.status(404).json({'error': 'User not found'});
+			} catch (e) {
+					console.log('Erro: ' + e);
+					return response.status(500).json({'error': 'Error in SQL'});
+			}   
     },
 
     async login(request, response) {
