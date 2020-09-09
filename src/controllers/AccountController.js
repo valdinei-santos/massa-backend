@@ -13,14 +13,15 @@ module.exports = {
             const [count] = await connection('users').count();
             const users = await connection('users')
                 .limit(qtdByPage)
-                .offset((page - 1) * qtdByPage)
-                .select('*')
+								.offset((page - 1) * qtdByPage)
+								.where({fl_ativo: 1})
+                .select('id', 'email', 'nome', 'fl_admin', 'fl_vendedor', 'fl_usuario', 'fl_ativo')
                 .orderBy('nome', 'asc');
             response.header('X-Total-Count', count['count']);
             if (users) {
                 return response.status(200).json(users);
             } 
-            return response.status(400).json({'error': 'Users not found'});
+            return response.status(404).json({'error': 'Users not found'});
         } catch (e) {
             console.log('Erro: ' + e);
             return response.status(500).json({'error': 'Error in SQL'});
@@ -40,7 +41,7 @@ module.exports = {
             if (id) {
                 return response.status(201).json({ id });
             } 
-            return response.status(400).json({'error': 'User not created'});
+            return response.status(404).json({'error': 'User not created'});
         } catch (e) {
             console.log('Erro: ' + e);
             return response.status(500).json({'error': 'Error in SQL'});
@@ -50,17 +51,33 @@ module.exports = {
 		async update(request, response) {
 			try {
 				  const { id } = request.params;
-					const { email, password, nome, fl_admin, fl_vendedor, fl_usuario, fl_ativo } = request.body;
-					const salt = bcrypt.genSaltSync(10);
-					const hash = bcrypt.hashSync(password, salt);
-					
+					const { email, nome, fl_admin, fl_vendedor, fl_usuario, fl_ativo } = request.body;
 					const result = await connection('users')
 					    .where({id: id})
-							.update({email, password: hash, nome, fl_admin, fl_vendedor, fl_usuario, fl_ativo});
+							.update({email, nome, fl_admin, fl_vendedor, fl_usuario, fl_ativo});
 					if (result) {
 							return response.status(200).json({ id });
 					} 
 					return response.status(404).json({'error': 'User not updated'});
+			} catch (e) {
+					console.log('Erro: ' + e);
+					return response.status(500).json({'error': 'Error in SQL'});
+			}
+		},
+
+		async update_password(request, response) {
+			try {
+				  const { id } = request.params;
+					const { password } = request.body;
+					const salt = bcrypt.genSaltSync(10);
+					const hash = bcrypt.hashSync(password, salt);
+					const result = await connection('users')
+					    .where({id: id})
+							.update({password: hash});
+					if (result) {
+							return response.status(200).json({ id });
+					} 
+					return response.status(404).json({'error': 'User password not updated'});
 			} catch (e) {
 					console.log('Erro: ' + e);
 					return response.status(500).json({'error': 'Error in SQL'});
