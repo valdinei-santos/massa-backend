@@ -88,7 +88,7 @@ module.exports = {
 			try {
 				const { id } = request.params;
 				let result = null;
-				result = await db('users')
+				result = await connection('users')
 						.where({id: id})
 						.update({ fl_ativo: 0 });
 				if (result) {
