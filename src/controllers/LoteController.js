@@ -197,7 +197,8 @@ module.exports = {
                 .catch(() => {
                     trx.rollback();
                     return response.status(400).json({'error': 'Lote not deleted'});
-                });
+								});
+						
         } catch (e) {
             console.log('Erro: ' + e);
             return response.status(500).json({'error': 'Error in SQL'});

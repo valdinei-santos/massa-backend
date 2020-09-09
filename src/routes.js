@@ -14,9 +14,9 @@ const routes = express.Router();
 routes.post('/login', AccountController.login);
 routes.post('/user/register', [checkJwt], AccountController.create);
 routes.get('/users', [checkJwt], AccountController.index);
-routes.put('/users', [checkJwt], AccountController.update);
-routes.put('/users/password', [checkJwt], AccountController.update_password);
-routes.delete('/users', [checkJwt], AccountController.delete);
+routes.put('/users/:id([0-9]+)', [checkJwt], AccountController.update);
+routes.put('/users/password/:id([0-9]+)', [checkJwt], AccountController.update_password);
+routes.delete('/users/:id([0-9]+)', [checkJwt], AccountController.delete);
 
 routes.get('/clientes', [checkJwt], ClienteController.index);
 //routes.get('/clientes', [], ClienteController.index);
