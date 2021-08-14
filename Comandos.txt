@@ -2,6 +2,8 @@ POSTGRES
 
 -- Para subir o postgres no meu MAC
 pg_ctl -D /usr/local/var/postgres start
+/usr/local/opt/postgresql@12/bin/postgres -D /usr/local/var/postgres
+/usr/local/opt/postgresql@12/bin/postgres -D /usr/local/var/postgresql@12
 
 -- Para deixar o postgres como um serviço. No momento não achei necessário
 brew services start postgresql
@@ -45,15 +47,37 @@ npx knex seed:run
 
 
 HEROKU  -- URL da app https://massa-backend.herokuapp.com/
+https://github.com/cod3rcursos/deploy-heroku-backend
 
 -- Exemplo de variavel de ambiente sendo setada no Heroku
 heroku config:set URL_DB=xxxx
 
 -- Acessar o bash da app no Heroku
-heroku run bash
+heroku run --app=massa-backend bash
 
 -- Acessar DB PostgreSQL
-heroku pg:psql
+heroku pg:psql --app=massa-backend
+heroku pg:psql postgresql-symmetrical-48631 --app massa-backend
 
--- 
+-- Para ver o log da aplicação (Tem que estar logado no Heroku (heroku login))
+heroku logs --tail
+
+-- Para ver o status das credenciais
+heroku pg:credentials --app=massa-backend DATABASE
+
+-- Para ver as configuções/Variaveis de ambiente
+heroku config --app=massa-backend
+
+-- Para não fazer a checagem de SSL podemos incluir a variavel de ambiente PGSSLMODE
+heroku config:set PGSSLMODE=no-verify --app=massa-backend
+
+-- Dados BD na Heroku:
+Host --> ec2-18-235-20-228.compute-1.amazonaws.com
+Database --> d4pe8ris5ida2a
+User --> nqfgfhouotpcog
+Port --> 5432
+Password --> 3cce6aef0e161d7d4f433b90b2890b388766c53177cc5f34694ffa2ebf46868a
+URI --> postgres://nqfgfhouotpcog:3cce6aef0e161d7d4f433b90b2890b388766c53177cc5f34694ffa2ebf46868a@ec2-18-235-20-228.compute-1.amazonaws.com:5432/d4pe8ris5ida2a
+Heroku CLI --> heroku pg:psql postgresql-symmetrical-48631 --app massa-backend
+
 
